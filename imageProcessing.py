@@ -4,28 +4,46 @@ from matplotlib import pyplot as plt
 
 # reading image
 cap = cv2.VideoCapture(0)
-# b=b-163 # ye yaha pe value change ki thi blue ki
+
 font = cv2.FONT_HERSHEY_COMPLEX                ##Font style for writing text on video frame
 
 
 
-# r=r+142
 
 
 
+# cv2.namedWindow('track', cv2.WINDOW_NORMAL)
+
+
+# cv2.createTrackbar('bt','track',0,255, nothing)
+# cv2.createTrackbar('gt','track',0,255, nothing)
+# cv2.createTrackbar('rt','track',0,255, nothing)
 
 
 
 while (1):
+#     bt = cv2.getTrackbarPos('bt', 'track')
+#     gt = cv2.getTrackbarPos('gt', 'track')
+#     rt = cv2.getTrackbarPos('rt', 'track')
+     
+    #value obtained after trial and run using trackbar (code is commented out)
+    bt=24
+    gt=42
+    rt=222
     
     ret,frame = cap.read()
 
     b,g,r= cv2.split(frame)
+    
+    b_ = b - bt
+    g_ = g - gt
+    r_ = r + rt
+
 
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    equc_b= clahe.apply(b)
-    equc_g = clahe.apply(g)
-    equc_r = clahe.apply(r)
+    equc_b= clahe.apply(b_)
+    equc_g = clahe.apply(g_)
+    equc_r = clahe.apply(r_)
     equc = cv2.merge((equc_b, equc_g, equc_r))
 
     frame=equc
@@ -62,7 +80,14 @@ while (1):
     # approx the contour a little
     epsilon = 0.0005 * cv2.arcLength(cnt, True)
     approx = cv2.approxPolyDP(cnt, epsilon, True)
-
+    
+    #circle around the countour which give as the center of the gate
+    (x, y), radius = cv2.minEnclosingCircle(cnt)
+    center = (int(x), int(y))
+    radius = int(radius)
+    cv2.circle(frame, center, radius, (0, 255, 0), 2)
+    
+    #distance between the camera and the object detected by code
     distance = 2*(10**(-7))* (area**2) - (0.0067 * area) + 83.487
     M = cv2.moments(cnt)
     Cx = int(M['m10']/M['m00'])
@@ -77,7 +102,10 @@ while (1):
     # cv2.imshow('res', res)
 
     cv2.imshow('frame',frame)
+    
+    cv2.imshow('mask', mask)
     print(area)
+    print(center)
 
     k = cv2.waitKey(5) & 0xFF
 
@@ -86,5 +114,4 @@ while (1):
 
 
 cv2.destroyAllWindows()
-
-# cap.release()
+cap.release()
