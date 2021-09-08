@@ -8,21 +8,33 @@ font = cv2.FONT_HERSHEY_COMPLEX
 
 while (1):
     
-    ret,frame = cap.read()
+    frame= cv2.imread('test.jpeg')
     b,g,r= cv2.split(frame)
+
+
+    bt=24
+    gt=42
+    rt=222
+       
+    b_ = b - bt
+    g_ = g - gt
+    r_ = r + rt
+
+
+
+
 
     # applying CLAHE on frames
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    equc_b= clahe.apply(b)
-    equc_g = clahe.apply(g)
-    equc_r = clahe.apply(r)
+    equc_b= clahe.apply(b_)
+    equc_g = clahe.apply(g_)
+    equc_r = clahe.apply(r_)
     equc = cv2.merge((equc_b, equc_g, equc_r))
-    frame=equc
 
 
 
     kernel = np.ones((3, 3), np.uint8)
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(equc, cv2.COLOR_BGR2HSV)
 
 
 
@@ -31,10 +43,13 @@ while (1):
     upper_blue = np.array([130, 255, 255])
 
 
+
     #creating mask
     mask = cv2.inRange(hsv, lower_blue, upper_blue)
     mask = cv2.dilate(mask, kernel, iterations=4)
     mask = cv2.GaussianBlur(mask, (5, 5), 100)
+
+    cv2.imshow('mask',mask)
 
     #finding contours
     contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -116,3 +131,6 @@ while (1):
 cv2.destroyAllWindows()
 
 # cap.release()
+
+
+    
